@@ -1,1 +1,12 @@
-[]
+[
+    {
+        "username": "U_ser-nam.e",
+        "password": "$2b$10$9vv0vpm9GV03DoILrCEXDeNSqNky.cFW3INiy4nGQIuaJQaq3Ue.q",
+        "role": false
+    },
+    {
+        "username": "admin",
+        "password": "$2b$10$CCs5gWiK76NNG.uanrhOcuyqekZi5Rtk8g8DGcUIHP1CO6vbsXbTW",
+        "role": true
+    }
+]
