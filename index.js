@@ -38,6 +38,17 @@ const saveUsers = () => {
         errorHandler(error, req, res);
     }
 };
+// Authentication Middlewares
+const checkValidUser = (decodedToken) => {
+    try {
+        let { id } = decodedToken;
+        const foundUser = users.find((user) => user.id === id);
+        return foundUser;
+    } catch (error) {
+        console.error("Passed to error handler.");
+        errorHandler(error, req, res);
+    }
+};
 const decodeToken = async (req, res, next) => {
     try {
         let token = req.headers.authorization;
