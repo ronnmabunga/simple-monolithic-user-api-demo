@@ -81,6 +81,51 @@ const decodeToken = async (req, res, next) => {
         errorHandler(error, req, res);
     }
 };
+// Authorization Middlewares
+const validateNotLoggedIn = (req, res, next) => {
+    try {
+        if (req.user) {
+            console.log("Already logged in. User Authorization Failed.");
+            return res.status(403).send({ success: false, message: "You do not have permission to access this resource." });
+        }
+        next();
+    } catch (error) {
+        console.error("Passed to error handler.");
+        errorHandler(error, req, res);
+    }
+};
+const validateAdmin = (req, res, next) => {
+    try {
+        if (!req.user) {
+            console.log("Authentication Failed.");
+            return res.status(401).send({ success: false, message: "Authentication Failed. Please provide valid credentials." });
+        }
+        if (req.user.role !== "admin") {
+            console.log("Admin access required.");
+            return res.status(403).send({ success: false, message: "You do not have permission to access this resource." });
+        }
+        next();
+    } catch (error) {
+        console.error("Passed to error handler.");
+        errorHandler(error, req, res);
+    }
+};
+const validateNotAdmin = (req, res, next) => {
+    try {
+        if (!req.user) {
+            console.log("Authentication Failed.");
+            return res.status(401).send({ success: false, message: "Authentication Failed. Please provide valid credentials." });
+        }
+        if (req.user.role === "admin") {
+            console.log("Admins cannot perform this action.");
+            return res.status(403).send({ success: false, message: "You do not have permission to access this resource." });
+        }
+        next();
+    } catch (error) {
+        console.error("Passed to error handler.");
+        errorHandler(error, req, res);
+    }
+};
 // Error handling
 const errorHandler = async (error, req, res, next) => {
     const statusCode = error.status || 500;
