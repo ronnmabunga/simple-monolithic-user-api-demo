@@ -155,6 +155,80 @@ const errorHandler = async (error, req, res, next) => {
     console.error(JSON.stringify({ name: error.name, message: error.message, stack: error.stack, cause: error.cause, code: error.code, path: error.path, errno: error.errno, type: error.type }, null, 2));
     res.status(statusCode).send({ error: errorMessage });
 };
+// Routes
+/**
+ * @swagger
+ * /users/register:
+ *   post:
+ *     summary: Register a new user account
+ *     description: Register a user with a unique username and a strong password. The request must either not contain a Bearer token, contain an unverifiable token, or contain a verifiable token that doesn't reference an existing user.
+ *     tags:
+ *       - Users
+ *     operationId: registerUser
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: "A unique username (3-15 characters). Must start with a letter and contain only letters, digits, and symbols ._-"
+ *                 example: "U_ser-nam.e"
+ *                 pattern: "^[a-zA-Z][\\w.-]{2,14}$"
+ *               password:
+ *                 type: string
+ *                 description: "A password (8-32 characters) containing at least 1 uppercase, 1 lowercase, 1 digit, and 1 special character."
+ *                 example: "p@55w0rD"
+ *                 pattern: "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[~!@#$%^&*()_+\\-={[}\\]|\\\\:;\"'<,>.?\\/])[\\w~!@#$%^&*()+\\-={[}\\]|\\\\:;\"'<,>.?\\/]{8,32}$"
+ *     responses:
+ *       201:
+ *         description: User registered successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Registered Successfully."
+ *       403:
+ *         description: User is already authenticated via Bearer token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "You do not have permission to access this resource."
+ *       500:
+ *         description: Unexpected server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Something went wrong. Please try again later."
+ *     security:
+ *       - bearerAuth: []
+ *     deprecated: false
+ */
 app.post("/users/register", decodeToken, validateNotLoggedIn, async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -174,6 +248,103 @@ app.post("/users/register", decodeToken, validateNotLoggedIn, async (req, res) =
         errorHandler(error, req, res);
     }
 });
+/**
+ * @swagger
+ * /users/login:
+ *   post:
+ *     summary: Login to an existing user account
+ *     description: Allows a user to log in by providing a valid username and password. The request must either not contain a Bearer token, contain an unverifiable token, or contain a verifiable token that doesn't reference an existing user.
+ *     tags:
+ *       - Users
+ *     operationId: loginUser
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: "A valid username that exists in the database."
+ *                 example: "U_ser-nam.e"
+ *               password:
+ *                 type: string
+ *                 description: "The password that matches the provided username."
+ *                 example: "p@55w0rD"
+ *     responses:
+ *       200:
+ *         description: User logged in successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Logged in Successfully."
+ *       400:
+ *         description: Invalid input format.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid input format."
+ *       401:
+ *         description: Username does not exist or password does not match.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid username or password."
+ *       403:
+ *         description: User is already authenticated via Bearer token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "You do not have permission to access this resource."
+ *       500:
+ *         description: Unexpected server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Something went wrong. Please try again later."
+ *     security:
+ *       - bearerAuth: []
+ *     deprecated: false
+ */
 app.post("/users/login", decodeToken, validateNotLoggedIn, (req, res) => {
     try {
         const { username, password } = req.body;
@@ -192,12 +363,203 @@ app.post("/users/login", decodeToken, validateNotLoggedIn, (req, res) => {
         errorHandler(error, req, res);
     }
 });
+/**
+ * @swagger
+ * /users/visitors:
+ *   get:
+ *     summary: Confirm visitor status
+ *     description: This endpoint returns a welcome message confirming the visitor status. The request must either not contain a Bearer token, contain an unverifiable token, or contain a verifiable token that doesn't reference an existing user.
+ *     tags:
+ *       - Visitors
+ *     operationId: getVisitorStatus
+ *     requestBody:
+ *       required: false
+ *     responses:
+ *       200:
+ *         description: Visitor confirmation successful.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Hello, welcome to the visitors page!"
+ *       403:
+ *         description: Authenticated users are not allowed to access the visitor endpoint.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "You do not have permission to access this resource."
+ *       500:
+ *         description: Unexpected server error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Something went wrong. Please try again later."
+ *     security:
+ *       - bearerAuth: []
+ *     deprecated: false
+ */
 app.get("/users/visitors", decodeToken, validateNotLoggedIn, (req, res) => {
     res.status(200).send({ success: true, message: `` });
 });
+/**
+ * @swagger
+ * /users/non-admins:
+ *   get:
+ *     summary: Confirm authenticated non-admin user status
+ *     description: This endpoint returns a message confirming the authenticated non-admin user status. A valid Bearer token referencing an existing non-admin user must be provided.
+ *     tags:
+ *       - Users
+ *     operationId: getNonAdminStatus
+ *     requestBody:
+ *       required: false
+ *     responses:
+ *       200:
+ *         description: Non-admin user confirmation successful.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Hello <username>, welcome to the users page!"
+ *       401:
+ *         description: Unverifiable or missing Bearer token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Authentication failed. Please provide valid credentials."
+ *       403:
+ *         description: Access denied for admin users or inexistent user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "You do not have permission to access this resource."
+ *       500:
+ *         description: Unexpected server error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Something went wrong. Please try again later."
+ *     security:
+ *       - bearerAuth: []
+ *     deprecated: false
+ */
 app.get("/users/non-admins", decodeToken, validateNotAdmin, (req, res) => {
     res.status(200).send({ success: true, message: `Hello ${req.user.username}, welcome to the users page!` });
 });
+/**
+ * @swagger
+ * /users/admins:
+ *   get:
+ *     summary: Confirm authenticated admin user status
+ *     description: This endpoint returns a message confirming the authenticated admin user status. A valid Bearer token referencing an existing admin user must be provided.
+ *     tags:
+ *       - Admins
+ *     operationId: getAdminStatus
+ *     requestBody:
+ *       required: false
+ *     responses:
+ *       200:
+ *         description: Admin user confirmation successful.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Hello <username>, welcome to the admin dashboard!"
+ *       401:
+ *         description: Unverifiable or missing Bearer token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Authentication failed. Please provide valid credentials."
+ *       403:
+ *         description: Access denied for non-admin users or inexistent user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "You do not have permission to access this resource."
+ *       500:
+ *         description: Unexpected server error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Something went wrong. Please try again later."
+ *     security:
+ *       - bearerAuth: []
+ *     deprecated: false
+ */
 app.get("/users/admins", decodeToken, validateAdmin, (req, res) => {
     res.status(200).send({ success: true, message: `Hello ${req.user.username}, welcome to the admin dashboard!` });
 });
