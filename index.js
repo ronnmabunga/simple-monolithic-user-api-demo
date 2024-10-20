@@ -9,6 +9,27 @@ require("dotenv").config();
 // Secrets
 const PORT = process.env.PORT || 4001;
 const JWT_SECRET = process.env.JWT_SECRET;
+// DEV DEPENDENCIES
+const swaggerJsDoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+const swaggerOptions = {
+    swaggerDefinition: {
+        openapi: "3.0.0",
+        info: {
+            title: "Simple Monolithic Express.js User Authentication and Authorization API",
+            version: "1.0.0",
+            description: "API documentation for a simple Express application that allows user registration, authentication and authorization.",
+        },
+        servers: [
+            {
+                url: `http://localhost:${PORT}`,
+            },
+        ],
+    },
+    apis: ["./index.js"],
+};
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // Configuration to convert JSON payloads to JS objects
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
