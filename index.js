@@ -2,6 +2,7 @@
 const express = require("express");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
@@ -133,6 +134,25 @@ const errorHandler = async (error, req, res, next) => {
     console.error(JSON.stringify({ name: error.name, message: error.message, stack: error.stack, cause: error.cause, code: error.code, path: error.path, errno: error.errno, type: error.type }, null, 2));
     res.status(statusCode).send({ error: errorMessage });
 };
+app.post("/users/register", decodeToken, validateNotLoggedIn, async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        let newUser = {
+            username: username,
+            password: bcrypt.hashSync(password, 10),
+            role: false,
+        };
+        const savedUser = { ...newUser };
+        users.push(savedUser);
+        saveUsers();
+        delete newUser.password;
+        console.log("Registered Successfully");
+        res.status(201).send({ success: true, message: "Registered Successfully", user: newUser });
+    } catch (error) {
+        console.error("Passed to error handler.");
+        errorHandler(error, req, res);
+    }
+});
 if (require.main === module) {
     app.listen(PORT || 4005, () => {
         console.log(`API is now online on port ${PORT || 4005}`);
