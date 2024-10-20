@@ -153,6 +153,24 @@ app.post("/users/register", decodeToken, validateNotLoggedIn, async (req, res) =
         errorHandler(error, req, res);
     }
 });
+app.post("/users/login", decodeToken, validateNotLoggedIn, (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const user = users.find((user) => user.username === username);
+        if (!user || !bcrypt.compareSync(password, user.password)) {
+            console.log("Invalid credentials.");
+            return res.status(401).json({ success: false, message: "Access denied. Please provide valid credentials." });
+        }
+        let tempUser = { ...user };
+        delete tempUser.password;
+        const token = jwt.sign(tempUser, JWT_SECRET);
+        console.log("User access granted.");
+        return res.status(200).send({ success: true, message: "User access granted.", access: token });
+    } catch (error) {
+        console.error("Passed to error handler.");
+        errorHandler(error, req, res);
+    }
+});
 if (require.main === module) {
     app.listen(PORT || 4005, () => {
         console.log(`API is now online on port ${PORT || 4005}`);
