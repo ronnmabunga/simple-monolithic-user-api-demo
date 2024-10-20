@@ -1,11 +1,13 @@
 // DEPENDENCIES
 const express = require("express");
 const fs = require("fs");
+const jwt = require("jsonwebtoken");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
 // Secrets
 const PORT = process.env.PORT || 4001;
+const JWT_SECRET = process.env.JWT_SECRET;
 // Configuration to convert JSON payloads to JS objects
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -31,6 +33,38 @@ const users = loadUsers();
 const saveUsers = () => {
     try {
         fs.writeFileSync("./usersData.json", JSON.stringify(users, null, 2));
+    } catch (error) {
+        console.error("Passed to error handler.");
+        errorHandler(error, req, res);
+    }
+};
+const decodeToken = async (req, res, next) => {
+    try {
+        let token = req.headers.authorization;
+        if (typeof token !== "string" || token.length < 8) {
+            console.log("No Token Found. Authentication Failed.");
+            next();
+            return;
+        }
+        token = token.slice(7, token.length);
+        jwt.verify(token, JWT_SECRET, async function (err, decodedToken) {
+            log.variables["err"] = err;
+            log.variables["decodedToken"] = decodedToken;
+            if (err) {
+                console.log("Token Verification Failed. Authentication Failed.");
+                next();
+            } else {
+                let isValidUser = checkValidUser(decodedToken);
+                if (isValidUser) {
+                    console.log("Token Verification Successful. User Verification Successful.");
+                    req.user = decodedToken;
+                    next();
+                } else {
+                    console.log("Token Verification Successful. User Verification Failed.");
+                    next();
+                }
+            }
+        });
     } catch (error) {
         console.error("Passed to error handler.");
         errorHandler(error, req, res);
