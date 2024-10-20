@@ -90,4 +90,4 @@ Use these sample users to test the API:
 
 # License
 
-    This project is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+    This project is licensed under the GNU GENERAL PUBLIC LICENSE.
