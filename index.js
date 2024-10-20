@@ -171,6 +171,15 @@ app.post("/users/login", decodeToken, validateNotLoggedIn, (req, res) => {
         errorHandler(error, req, res);
     }
 });
+app.get("/users/visitors", decodeToken, validateNotLoggedIn, (req, res) => {
+    res.status(200).send({ success: true, message: `` });
+});
+app.get("/users/non-admins", decodeToken, validateNotAdmin, (req, res) => {
+    res.status(200).send({ success: true, message: `Hello ${req.user.username}, welcome to the users page!` });
+});
+app.get("/users/admins", decodeToken, validateAdmin, (req, res) => {
+    res.status(200).send({ success: true, message: `Hello ${req.user.username}, welcome to the admin dashboard!` });
+});
 if (require.main === module) {
     app.listen(PORT || 4005, () => {
         console.log(`API is now online on port ${PORT || 4005}`);
