@@ -36,6 +36,13 @@ const saveUsers = () => {
         errorHandler(error, req, res);
     }
 };
+// Error handling
+const errorHandler = async (error, req, res, next) => {
+    const statusCode = error.status || 500;
+    const errorMessage = error.message || "An unexpected error has occurred.";
+    console.error(JSON.stringify({ name: error.name, message: error.message, stack: error.stack, cause: error.cause, code: error.code, path: error.path, errno: error.errno, type: error.type }, null, 2));
+    res.status(statusCode).send({ error: errorMessage });
+};
 if (require.main === module) {
     app.listen(PORT || 4005, () => {
         console.log(`API is now online on port ${PORT || 4005}`);
