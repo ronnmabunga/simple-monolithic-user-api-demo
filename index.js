@@ -419,7 +419,7 @@ app.post("/users/login", decodeToken, validateNotLoggedIn, (req, res) => {
  *     deprecated: false
  */
 app.get("/users/visitors", decodeToken, validateNotLoggedIn, (req, res) => {
-    res.status(200).send({ success: true, message: `` });
+    res.status(200).send({ success: true, message: `Hello, welcome to the visitors page!` });
 });
 /**
  * @swagger
