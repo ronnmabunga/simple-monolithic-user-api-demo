@@ -9,6 +9,7 @@ require("dotenv").config();
 // Secrets
 const PORT = process.env.PORT || 4001;
 const JWT_SECRET = process.env.JWT_SECRET;
+const SERVER = process.env.SERVER || "http://localhost:4000";
 // DEV DEPENDENCIES
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
@@ -16,13 +17,22 @@ const swaggerOptions = {
     swaggerDefinition: {
         openapi: "3.0.0",
         info: {
-            title: "Simple Monolithic Express.js User Authentication and Authorization API",
+            title: "Monolithic Express.js User Authentication and Authorization API",
             version: "1.0.0",
             description: "API documentation for a simple Express application that allows user registration, authentication and authorization.",
         },
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT",
+                },
+            },
+        },
         servers: [
             {
-                url: `http://localhost:${PORT}`,
+                url: `${SERVER}`,
             },
         ],
     },
@@ -110,6 +120,16 @@ const decodeToken = async (req, res, next) => {
         errorHandler(error, req, res);
     }
 };
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *       description: "Enter your Bearer token in the format **&lt;token&gt;**"
+ */
 // Authorization Middlewares
 const validateNotLoggedIn = (req, res, next) => {
     try {
@@ -225,8 +245,7 @@ const validateNotAdmin = (req, res, next) => {
  *                 message:
  *                   type: string
  *                   example: "Something went wrong. Please try again later."
- *     security:
- *       - bearerAuth: []
+ *     security: [{ bearerAuth: [] }]
  *     deprecated: false
  */
 app.post("/users/register", decodeToken, validateNotLoggedIn, async (req, res) => {
@@ -270,14 +289,23 @@ app.post("/users/register", decodeToken, validateNotLoggedIn, async (req, res) =
  *               username:
  *                 type: string
  *                 description: "A valid username that exists in the database."
- *                 example: "U_ser-nam.e"
  *               password:
  *                 type: string
  *                 description: "The password that matches the provided username."
- *                 example: "p@55w0rD"
+ *           examples:
+ *             example1:
+ *               summary: "An example of a login request for an existing non-admin user in the database."
+ *               value:
+ *                 username: "U_ser-nam.e"
+ *                 password: "p@55w0rD"
+ *             example2:
+ *               summary: "An example of a login request for an existing admin user in the database."
+ *               value:
+ *                 username: "admin"
+ *                 password: "p@55w0rD"
  *     responses:
  *       200:
- *         description: User logged in successfully.
+ *         description: User logged in successfully. The response body property 'access' provide the authenticated user their respective Bearer Token which they can use for subsequent requests.
  *         content:
  *           application/json:
  *             schema:
@@ -289,6 +317,9 @@ app.post("/users/register", decodeToken, validateNotLoggedIn, async (req, res) =
  *                 message:
  *                   type: string
  *                   example: "Logged in Successfully."
+ *                 access:
+ *                   type: string
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR..."
  *       400:
  *         description: Invalid input format.
  *         content:
@@ -341,8 +372,7 @@ app.post("/users/register", decodeToken, validateNotLoggedIn, async (req, res) =
  *                 message:
  *                   type: string
  *                   example: "Something went wrong. Please try again later."
- *     security:
- *       - bearerAuth: []
+ *     security: [{ bearerAuth: [] }]
  *     deprecated: false
  */
 app.post("/users/login", decodeToken, validateNotLoggedIn, (req, res) => {
@@ -414,8 +444,7 @@ app.post("/users/login", decodeToken, validateNotLoggedIn, (req, res) => {
  *                 message:
  *                   type: string
  *                   example: "Something went wrong. Please try again later."
- *     security:
- *       - bearerAuth: []
+ *     security: [{ bearerAuth: [] }]
  *     deprecated: false
  */
 app.get("/users/visitors", decodeToken, validateNotLoggedIn, (req, res) => {
@@ -485,8 +514,7 @@ app.get("/users/visitors", decodeToken, validateNotLoggedIn, (req, res) => {
  *                 message:
  *                   type: string
  *                   example: "Something went wrong. Please try again later."
- *     security:
- *       - bearerAuth: []
+ *     security: [{ bearerAuth: [] }]
  *     deprecated: false
  */
 app.get("/users/non-admins", decodeToken, validateNotAdmin, (req, res) => {
@@ -556,8 +584,7 @@ app.get("/users/non-admins", decodeToken, validateNotAdmin, (req, res) => {
  *                 message:
  *                   type: string
  *                   example: "Something went wrong. Please try again later."
- *     security:
- *       - bearerAuth: []
+ *     security: [{ bearerAuth: [] }]
  *     deprecated: false
  */
 app.get("/users/admins", decodeToken, validateAdmin, (req, res) => {
