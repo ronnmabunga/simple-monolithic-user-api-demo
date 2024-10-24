@@ -595,4 +595,4 @@ if (require.main === module) {
         console.log(`API is now online on port ${PORT || 4005}`);
     });
 }
-module.exports = { app };
+module.exports = app;
