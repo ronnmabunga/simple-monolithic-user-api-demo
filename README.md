@@ -1,4 +1,4 @@
-# Simple Monolithic Express.js User Authentication and Authorization API
+# Monolithic Express.js User Authentication and Authorization API
 
 ## Description
 
@@ -6,7 +6,9 @@ This is a code demonstration of a Monolithic API application built with Express.
 
 ## Deployment Disclaimer
 
-The API currently deployed at: `https://simple-monolithic-user-api-demo.onrender.com/`, runs on a free web service on Render.com. Web services running on the free tier spins down after 15 minutes of inactivity, which may delay API responses by 90seconds (or even timed out) while the service does a cold start. 
+The API currently deployed at: <https://simple-monolithic-user-api-demo.onrender.com>, runs on a free web service on Render.com. Web services running on the free tier spins down after 15 minutes of inactivity, which may delay API responses by 90seconds (or even timed out) while the service boots up from a cold start. 
+
+The Swagger UI documentation can be viewed and tested at: <https://simple-monolithic-user-api-demo.onrender.com/api-docs/>.
 
 ## Features
 
@@ -67,7 +69,7 @@ Use these sample users to test the API:
 
 5.  Access Swagger Documentation:
 
--   Visit <http://localhost:{PORT}/api-docs> in your browser to explore the API routes with Swagger UI.
+-   Visit `http://localhost:{PORT}/api-docs` in your browser to explore the API routes with Swagger UI.
       - PORT - Port number indicated in the environment variables.
 
 ## API Routes Overview
