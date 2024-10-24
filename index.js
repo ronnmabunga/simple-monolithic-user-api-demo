@@ -40,6 +40,15 @@ const corsOptions = {
     optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
+// Error handling
+const errorHandler = async (error, req, res, next) => {
+    const statusCode = error.status || 500;
+    const errorMessage = error.message || "An unexpected error has occurred.";
+    console.error(JSON.stringify({ name: error.name, message: error.message, stack: error.stack, cause: error.cause, code: error.code, path: error.path, errno: error.errno, type: error.type }, null, 2));
+    if (res) {
+        res.status(statusCode).send({ error: errorMessage });
+    }
+};
 // Data Storage Functions
 const loadUsers = () => {
     try {
@@ -47,7 +56,7 @@ const loadUsers = () => {
         return JSON.parse(data);
     } catch (error) {
         console.error("Passed to error handler.");
-        errorHandler(error, req, res);
+        errorHandler(error);
     }
 };
 // Initialize in-memory storage
@@ -57,7 +66,7 @@ const saveUsers = () => {
         fs.writeFileSync("./usersData.json", JSON.stringify(users, null, 2));
     } catch (error) {
         console.error("Passed to error handler.");
-        errorHandler(error, req, res);
+        errorHandler(error);
     }
 };
 // Authentication Middlewares
@@ -81,8 +90,6 @@ const decodeToken = async (req, res, next) => {
         }
         token = token.slice(7, token.length);
         jwt.verify(token, JWT_SECRET, async function (err, decodedToken) {
-            log.variables["err"] = err;
-            log.variables["decodedToken"] = decodedToken;
             if (err) {
                 console.log("Token Verification Failed. Authentication Failed.");
                 next();
@@ -147,13 +154,6 @@ const validateNotAdmin = (req, res, next) => {
         console.error("Passed to error handler.");
         errorHandler(error, req, res);
     }
-};
-// Error handling
-const errorHandler = async (error, req, res, next) => {
-    const statusCode = error.status || 500;
-    const errorMessage = error.message || "An unexpected error has occurred.";
-    console.error(JSON.stringify({ name: error.name, message: error.message, stack: error.stack, cause: error.cause, code: error.code, path: error.path, errno: error.errno, type: error.type }, null, 2));
-    res.status(statusCode).send({ error: errorMessage });
 };
 // Routes
 /**
@@ -235,7 +235,7 @@ app.post("/users/register", decodeToken, validateNotLoggedIn, async (req, res) =
         let newUser = {
             username: username,
             password: bcrypt.hashSync(password, 10),
-            role: false,
+            role: "user",
         };
         const savedUser = { ...newUser };
         users.push(savedUser);
